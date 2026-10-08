@@ -15,6 +15,11 @@
   --color-rule: #8c4e1d;
   --color-water: #0073cf;
   --color-water-deep: #004f8f;
+  /* Tints of water: same hue and saturation, only the lightness moves. */
+  --color-water-lighter: hsl(from var(--color-water) h s 80%);
+  --color-water-light: hsl(from var(--color-water) h s 62%);
+  --color-water-dark: hsl(from var(--color-water) h s 30%);
+  --color-water-darker: hsl(from var(--color-water) h s 20%);
 
   --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
