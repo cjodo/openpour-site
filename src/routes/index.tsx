@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import detailImg from "@/assets/openpour-detail.jpg";
-import heroImg from "@/assets/openpour-hero.jpg";
 import { EspressifMark } from "@/components/espressif-mark";
 import { GithubMark } from "@/components/github-mark";
+import { MachineDiagram } from "@/components/machine-diagram";
+import { PartsDiagram } from "@/components/parts-diagram";
 import { PourPlot } from "@/components/pour-plot";
 import { RustMark } from "@/components/rust-mark";
 
@@ -99,20 +99,6 @@ function Section({ id, title, children }: { id: string; title: string; children:
       <h2 className="wide text-3xl sm:text-4xl">{title}</h2>
       <div className="mt-8">{children}</div>
     </section>
-  );
-}
-
-// The product images are renders of the target design, not photos of the
-// prototype. Keep this caption until real prototype photos replace them.
-function ConceptImage(props: { src: string; alt: string; width: number; height: number }) {
-  return (
-    <figure>
-      <img {...props} loading="lazy" className="w-full rounded-sm" />
-      <figcaption className="mt-3 text-sm text-husk">
-        <strong className="font-semibold text-crema">Concept render.</strong> This shows where
-        the design is heading. The current prototype doesn&rsquo;t look like this yet.
-      </figcaption>
-    </figure>
   );
 }
 
@@ -282,12 +268,7 @@ function Index() {
                 Wi-Fi or yours. Recipes are edited there and stored on the machine.
               </li>
             </ul>
-            <ConceptImage
-              src={detailImg}
-              alt="Exploded concept drawing of the arm, pump and flow meter."
-              width={1200}
-              height={912}
-            />
+            <MachineDiagram />
           </div>
         </Section>
 
@@ -304,12 +285,7 @@ function Index() {
             ))}
           </ol>
           <div className="mt-14">
-            <ConceptImage
-              src={heroImg}
-              alt="Concept render of a finished OpenPour machine pouring into a V60 dripper."
-              width={1600}
-              height={1008}
-            />
+            <PartsDiagram />
           </div>
         </Section>
 

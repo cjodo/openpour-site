@@ -36,7 +36,6 @@ src/routes/index.tsx    the whole page — nav, hero, how it works, features,
 src/routes/__root.tsx   document shell: fonts, page metadata, 404 and error screens
 src/styles.css          design tokens (dark base, amber primary) and the
                         blueprint-grid / glow-amber utilities
-src/assets/*.jpg        the two product images
 src/server.ts           SSR error wrapper
 src/test/               route smoke test
 ```
