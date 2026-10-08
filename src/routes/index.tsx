@@ -1,438 +1,331 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  Github,
-  Droplets,
-  Gauge,
-  RotateCw,
-  Wifi,
-  FlaskConical,
-  Printer,
-  ShoppingCart,
-  Cable,
-  Cpu,
-  Wrench,
-  ArrowRight,
-  Code2,
-  Wind,
-} from "lucide-react";
-import heroImg from "@/assets/openpour-hero.jpg";
+import type { ReactNode } from "react";
+
 import detailImg from "@/assets/openpour-detail.jpg";
+import heroImg from "@/assets/openpour-hero.jpg";
+import { GithubMark } from "@/components/github-mark";
+import { PourPlot } from "@/components/pour-plot";
+
+const DESCRIPTION =
+  "OpenPour is an open-source automatic pour-over coffee machine: 3D-printed parts, commodity electronics and ESP32 firmware written in Rust.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "OpenPour — The open-source automatic pour-over machine" },
-      {
-        name: "description",
-        content:
-          "OpenPour is an open-source, 3D-printed automatic pour-over coffee machine. A polar arm traces barista patterns, a flow meter pours by the gram, and an ESP32 serves the control app — no cloud, no app store.",
-      },
-      { property: "og:title", content: "OpenPour — open-source automatic pour-over" },
-      {
-        property: "og:description",
-        content:
-          "3D-printed body, commodity parts, ESP32 firmware in Rust, and a browser app served by the machine itself. Build one for about $170–210.",
-      },
+      { title: "OpenPour: open-source automatic pour-over" },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: "OpenPour" },
+      { property: "og:description", content: DESCRIPTION },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Index,
 });
 
-const GITHUB_URL = "https://github.com/cjodo/openpour";
+const REPO = "https://github.com/cjodo/openpour";
+const repoPath = (path: string) => `${REPO}/tree/main/${path}`;
 
-const features = [
+// Not yet declared in the repo. Set this when a licence is chosen.
+const LICENCE: string | null = null;
+
+const repoTree = [
+  { path: "hardware/cad/", note: "OpenSCAD model; config.scad holds every dimension" },
+  { path: "firmware/", note: "ESP32 firmware in Rust, plus a host simulator" },
+  { path: "web/", note: "control app, embedded in the firmware at build time" },
+  { path: "docs/", note: "bill of materials, wiring, assembly, calibration" },
+];
+
+const firmwareParts = [
   {
-    icon: RotateCw,
-    title: "Pours like a barista",
-    body: "A two-axis polar arm traces centre, circle and spiral patterns over the dripper — the same motions a careful hand would make.",
+    name: "pourcore",
+    body: "The brewing logic: recipes, pour patterns, pump control and the stop-on-target maths. No hardware dependencies, so it runs anywhere Rust does.",
   },
   {
-    icon: Droplets,
-    title: "Pours by the gram",
-    body: "An inline flow meter counts every millilitre, and 1 mL of water is 1 g. Each stage stops on its gram target whatever the pump does.",
+    name: "ESP32 target",
+    body: "Drives the two steppers, the pump and the flow meter, reads the DS18B20, and serves the control app over Wi-Fi.",
   },
   {
-    icon: FlaskConical,
-    title: "Configurable recipes",
-    body: "Stages, water, flow rate, pattern, radius, speed and bloom times are all editable in the app and stored on the machine.",
-  },
-  {
-    icon: Wind,
-    title: "Low voltage only",
-    body: "You fill an insulated reservoir from your own kettle. The machine pumps, meters and measures temperature — it never heats water.",
-  },
-  {
-    icon: Wifi,
-    title: "No app store, no cloud",
-    body: "The ESP32 serves the control app itself. Open a browser on any phone or laptop, on the machine's own Wi-Fi or yours.",
-  },
-  {
-    icon: Wrench,
-    title: "Parametric by design",
-    body: "Set your cup and dripper heights in one OpenSCAD file and the column length, head position and parts follow.",
+    name: "Simulator",
+    body: "Runs the real pourcore logic against simulated hardware on your PC, so you can work on the firmware without a machine.",
   },
 ];
 
-const buildSteps = [
+const buildSteps: { title: string; body: ReactNode }[] = [
   {
-    icon: Printer,
-    step: "01",
     title: "Print",
-    body: "Edit config.scad, run make, and print the parts in PETG or ASA.",
+    body: (
+      <>
+        Set your cup and dripper heights in <Code>config.scad</Code>, run <Code>make</Code> to
+        export STLs, and print in PETG or ASA.
+      </>
+    ),
   },
   {
-    icon: ShoppingCart,
-    step: "02",
     title: "Buy",
-    body: "The bill of materials comes to about US$170–210 — commodity parts from the 3D-printer aisle.",
+    body: "Parts are estimated at US$170–210, mostly from the 3D-printer aisle. The BOM is in docs/.",
   },
   {
-    icon: Cable,
-    step: "03",
     title: "Wire",
-    body: "Follow the wiring guide: two NEMA17 steppers, a peristaltic pump, a flow meter and a DS18B20 probe.",
+    body: "Two NEMA17 steppers, a peristaltic pump, a flow meter and a DS18B20 probe, per the wiring guide.",
   },
   {
-    icon: Cpu,
-    step: "04",
     title: "Flash",
-    body: "cargo run --release builds the web app and firmware, flashes the ESP32 and opens the monitor.",
+    body: (
+      <>
+        <Code>cargo run --release</Code> builds the app and firmware, flashes the ESP32 and
+        opens the serial monitor.
+      </>
+    ),
   },
   {
-    icon: Gauge,
-    step: "05",
     title: "Calibrate",
-    body: "Join the OpenPour Wi-Fi network, open the app, and calibrate the meter against a scale.",
+    body: "Join the OpenPour Wi-Fi network, open the app, and calibrate the flow meter against a kitchen scale.",
   },
 ];
 
-const repoRows = [
-  ["hardware/cad/", "OpenSCAD model — config.scad holds every dimension; make exports STLs"],
-  ["firmware/", "ESP32 firmware in Rust — pourcore logic, esp32 target, and a PC simulator"],
-  ["web/", "The control app — TypeScript bundled with esbuild, embedded in the firmware"],
-  ["docs/", "BOM, wiring, assembly and calibration guides"],
-];
+function Code({ children }: { children: ReactNode }) {
+  return (
+    <code className="rounded-sm bg-roast-raised px-1 py-0.5 font-mono text-[0.9em] text-crema">
+      {children}
+    </code>
+  );
+}
+
+function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
+  return (
+    <section id={id} className="scroll-mt-6 border-t border-rule py-16 sm:py-20">
+      <h2 className="wide text-3xl sm:text-4xl">{title}</h2>
+      <div className="mt-8">{children}</div>
+    </section>
+  );
+}
+
+// The product images are renders of the target design, not photos of the
+// prototype. Keep this caption until real prototype photos replace them.
+function ConceptImage(props: { src: string; alt: string; width: number; height: number }) {
+  return (
+    <figure>
+      <img {...props} loading="lazy" className="w-full rounded-sm" />
+      <figcaption className="mt-3 text-sm text-husk">
+        <strong className="font-semibold text-crema">Concept render.</strong> This shows where
+        the design is heading. The current prototype doesn&rsquo;t look like this yet.
+      </figcaption>
+    </figure>
+  );
+}
+
+const link = "text-crema underline decoration-rule underline-offset-4 hover:decoration-water";
 
 function Index() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Nav */}
-      <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <a href="#top" className="flex items-center gap-2.5">
-            <span className="relative flex h-8 w-8 items-center justify-center rounded-md bg-primary">
-              <Droplets className="h-4.5 w-4.5 text-primary-foreground" />
-            </span>
-            <span className="font-display text-lg font-semibold tracking-tight">
-              OpenPour
-            </span>
+    <>
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-crema focus:px-3 focus:py-2 focus:text-roast"
+      >
+        Skip to content
+      </a>
+
+      <header className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-4 py-5 sm:px-8">
+        <a href="#main" className="wide text-lg">
+          OpenPour
+        </a>
+        <nav aria-label="Sections" className="flex items-center gap-5 text-sm sm:gap-8">
+          <a href="#open" className="hidden text-husk hover:text-crema sm:inline">
+            What&rsquo;s open
           </a>
-          <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-            <a href="#how" className="transition-colors hover:text-foreground">
-              How it works
-            </a>
-            <a href="#features" className="transition-colors hover:text-foreground">
-              Features
-            </a>
-            <a href="#build" className="transition-colors hover:text-foreground">
-              Build it
-            </a>
-          </nav>
-          <a
-            href={GITHUB_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3.5 py-2 text-sm font-medium transition-colors hover:border-primary/50 hover:text-primary"
-          >
-            <Github className="h-4 w-4" />
-            <span className="hidden sm:inline">cjodo/openpour</span>
-            <span className="sm:hidden">GitHub</span>
+          <a href="#rust" className="hidden text-husk hover:text-crema sm:inline">
+            Firmware
           </a>
-        </div>
+          <a href="#build" className="hidden text-husk hover:text-crema sm:inline">
+            Build
+          </a>
+          <a href={REPO} className="inline-flex items-center gap-2 text-crema hover:text-water">
+            <GithubMark className="size-4" />
+            GitHub
+          </a>
+        </nav>
       </header>
 
-      {/* Hero */}
-      <section id="top" className="relative overflow-hidden">
-        <div className="blueprint-grid pointer-events-none absolute inset-0" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,oklch(0.78_0.13_75/0.08),transparent)]" />
-        <div className="relative mx-auto max-w-6xl px-6 pb-20 pt-16 md:pb-28 md:pt-24">
-          <div className="grid items-center gap-12 lg:grid-cols-2">
-            <div>
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-xs font-medium tracking-wide text-primary">
-                <Code2 className="h-3.5 w-3.5" />
-                Open source · Open hardware · Repeatable
-              </div>
-              <h1 className="font-display text-balance text-5xl font-bold leading-[1.05] tracking-tight md:text-6xl">
-                The pour-over machine{" "}
-                <span className="text-primary">you build yourself.</span>
-              </h1>
-              <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground">
-                OpenPour is an automatic pour-over coffee machine with a
-                3D-printed body and commodity parts. A polar arm traces barista
-                patterns, a flow meter pours by the gram, and the whole thing
-                is controlled from any browser — no app store, no cloud.
+      <main id="main" className="mx-auto max-w-6xl px-4 sm:px-8">
+        <section className="grid gap-12 pt-8 pb-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-14 lg:pt-14 lg:pb-20">
+          <div>
+            <h1 className="wide text-[clamp(2.75rem,6vw,4.75rem)] text-balance">
+              Pour&#8209;over, by the gram.
+            </h1>
+            <p className="mt-7 max-w-[34rem] text-lg leading-relaxed text-husk">
+              OpenPour is an open-source automatic pour-over machine. Print the parts, wire up
+              commodity electronics, and flash Rust firmware that pours each stage of your
+              recipe to the gram. Every file you need is in the repo.
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
+              <a
+                href={REPO}
+                className="inline-flex items-center gap-2.5 rounded-sm bg-water px-5 py-3 font-semibold text-roast hover:bg-crema"
+              >
+                <GithubMark className="size-4" />
+                cjodo/openpour
+              </a>
+              <a href={repoPath("docs")} className={link}>
+                Read the build guides
+              </a>
+            </div>
+            <p className="mt-9 max-w-[34rem] border-l-2 border-water pl-4 text-sm leading-relaxed text-husk">
+              <strong className="font-semibold text-crema">Early prototype.</strong> The design
+              is still changing. Expect rough edges, and open an issue when you hit one.
+            </p>
+          </div>
+          <PourPlot />
+        </section>
+
+        <Section id="open" title="What’s open">
+          <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
+            <div className="max-w-[34rem] space-y-4 leading-relaxed text-husk">
+              <p>
+                All of it. The CAD, the firmware, the control app and the build guides live
+                together in one repository, so a hardware change and the code that drives it
+                land in the same commit.
               </p>
-              <div className="mt-8 flex flex-wrap items-center gap-4">
-                <a
-                  href={GITHUB_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="glow-amber inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.02]"
-                >
-                  <Github className="h-4 w-4" />
-                  Build one — it's open source
-                </a>
-                <a
-                  href="#how"
-                  className="inline-flex items-center gap-2 rounded-md border border-border px-6 py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-                >
-                  How it works
-                  <ArrowRight className="h-4 w-4" />
-                </a>
-              </div>
-              <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 font-mono-code text-xs text-muted-foreground">
-                <span>
-                  <span className="text-primary">$</span> cargo run --release
-                </span>
-                <span>
-                  <span className="text-primary">≈</span> US$170–210 in parts
-                </span>
-                <span>
-                  <span className="text-primary">◦</span> ESP32 · Rust · OpenSCAD
-                </span>
-              </div>
+              <p>
+                The model is parametric, the electronics are off the shelf, and nothing phones
+                home. Fork it, resize it for your dripper, and send your changes back.
+              </p>
+              <p>
+                Licence: <span className="text-crema">{LICENCE ?? "not yet declared"}</span>.
+              </p>
             </div>
-            <div className="relative">
-              <div className="glow-amber overflow-hidden rounded-xl border border-border">
-                <img
-                  src={heroImg}
-                  alt="The OpenPour machine pouring a spiral of water into a V60 dripper"
-                  width={1600}
-                  height={1008}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-4 left-6 rounded-md border border-border bg-card/95 px-4 py-2.5 backdrop-blur-sm">
-                <div className="flex items-center gap-2 font-mono-code text-xs">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-                  </span>
-                  <span className="text-muted-foreground">stage 2/4 · spiral ·</span>
-                  <span className="text-primary">312 g</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section id="how" className="border-t border-border/60 bg-card/40">
-        <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
-          <div className="mb-12 max-w-2xl">
-            <p className="font-mono-code text-xs uppercase tracking-[0.2em] text-primary">
-              How it works
-            </p>
-            <h2 className="font-display mt-3 text-3xl font-bold tracking-tight md:text-4xl">
-              Water, metered. Motion, planned.
-            </h2>
-            <p className="mt-4 leading-relaxed text-muted-foreground">
-              The firmware converts each pattern from dripper-centred
-              coordinates into arm angle and carriage radius 100 times a
-              second. Both steppers run in velocity mode so the nozzle follows
-              spirals smoothly, and the pump's speed is trimmed by the measured
-              flow — cut just early enough that coast-down lands on target.
-            </p>
-          </div>
-
-          <div className="grid gap-10 lg:grid-cols-2">
-            <div className="overflow-hidden rounded-xl border border-border">
-              <img
-                src={detailImg}
-                alt="Exploded engineering view of the OpenPour arm, pump and fluid system"
-                width={1200}
-                height={912}
-                loading="lazy"
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="flex flex-col justify-center gap-4">
-              <div className="rounded-lg border border-border bg-background p-5 font-mono-code text-[13px] leading-relaxed">
-                <div className="text-muted-foreground"># fluid path</div>
-                <div>
-                  <span className="text-primary">reservoir</span> ──►{" "}
-                  peristaltic pump ──► flow meter ──► nozzle
-                </div>
-                <div className="mt-3 text-muted-foreground"># motion</div>
-                <div>
-                  <span className="text-primary">arm</span> ──► radial axis
-                  (belt, pancake NEMA17)
-                </div>
-                <div>
-                  <span className="text-primary">arm</span> ──► theta axis
-                  (direct-drive NEMA17)
-                </div>
-                <div className="mt-3 text-muted-foreground"># control</div>
-                <div>
-                  <span className="text-primary">ESP32</span> ◄── pulses ──
-                  Wi-Fi ──► browser app
-                </div>
-              </div>
-              <ul className="space-y-3 text-sm leading-relaxed text-muted-foreground">
-                <li className="flex gap-3">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                  The pump's speed is feed-forward from its calibrated rate,
-                  trimmed by the measured flow in real time.
-                </li>
-                <li className="flex gap-3">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                  The web app is embedded in the firmware at build time — the
-                  machine serves it itself.
-                </li>
-                <li className="flex gap-3">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                  A host simulator runs the real firmware logic against
-                  simulated hardware, so you can develop without a machine.
-                </li>
+            <div className="self-start overflow-x-auto rounded-sm border border-rule bg-roast-raised p-5 font-mono text-sm leading-loose">
+              <a href={REPO} className="text-crema hover:text-water">
+                openpour/
+              </a>
+              <ul>
+                {repoTree.map((row, i) => (
+                  <li
+                    key={row.path}
+                    className="grid grid-cols-[auto_8.5rem_1fr] gap-x-2 whitespace-nowrap sm:whitespace-normal"
+                  >
+                    <span className="text-rule" aria-hidden="true">
+                      {i === repoTree.length - 1 ? "└──" : "├──"}
+                    </span>
+                    <a href={repoPath(row.path)} className="text-water hover:text-crema">
+                      {row.path}
+                    </a>
+                    <span className="text-husk">{row.note}</span>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
-        </div>
-      </section>
+        </Section>
 
-      {/* Features */}
-      <section id="features" className="border-t border-border/60">
-        <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
-          <div className="mb-12 max-w-2xl">
-            <p className="font-mono-code text-xs uppercase tracking-[0.2em] text-primary">
-              Features
-            </p>
-            <h2 className="font-display mt-3 text-3xl font-bold tracking-tight md:text-4xl">
-              Everything a good pour needs. Nothing it doesn't.
-            </h2>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((f) => (
-              <div
-                key={f.title}
-                className="group rounded-xl border border-border bg-card p-6 transition-colors hover:border-primary/40"
-              >
-                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-md bg-secondary text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                  <f.icon className="h-5 w-5" />
-                </div>
-                <h3 className="font-display text-lg font-semibold">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {f.body}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Build it */}
-      <section id="build" className="border-t border-border/60 bg-card/40">
-        <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
-          <div className="mb-12 max-w-2xl">
-            <p className="font-mono-code text-xs uppercase tracking-[0.2em] text-primary">
-              Build it
-            </p>
-            <h2 className="font-display mt-3 text-3xl font-bold tracking-tight md:text-4xl">
-              From filament to first pour in five steps.
-            </h2>
-          </div>
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-5">
-            {buildSteps.map((s) => (
-              <div
-                key={s.step}
-                className="relative rounded-xl border border-border bg-background p-5"
-              >
-                <div className="mb-4 flex items-center justify-between">
-                  <s.icon className="h-5 w-5 text-primary" />
-                  <span className="font-mono-code text-xs text-muted-foreground">
-                    {s.step}
-                  </span>
-                </div>
-                <h3 className="font-display font-semibold">{s.title}</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
-                  {s.body}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* Repo table */}
-          <div className="mt-14 overflow-hidden rounded-xl border border-border">
-            <div className="border-b border-border bg-background px-5 py-3.5">
-              <span className="font-mono-code text-xs text-muted-foreground">
-                github.com/<span className="text-foreground">cjodo/openpour</span>
-              </span>
-            </div>
-            <div className="divide-y divide-border bg-card/60">
-              {repoRows.map(([path, desc]) => (
-                <div
-                  key={path}
-                  className="grid gap-1 px-5 py-4 sm:grid-cols-[180px_1fr] sm:gap-6"
-                >
-                  <span className="font-mono-code text-[13px] text-primary">
-                    {path}
-                  </span>
-                  <span className="text-sm text-muted-foreground">{desc}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="relative overflow-hidden border-t border-border/60">
-        <div className="blueprint-grid pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-6xl px-6 py-20 text-center md:py-28">
-          <Droplets className="animate-drip mx-auto mb-6 h-8 w-8 text-primary" />
-          <h2 className="font-display mx-auto max-w-2xl text-balance text-3xl font-bold tracking-tight md:text-5xl">
-            Better coffee through open hardware.
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            Every dimension, every line of firmware, every guide — in the repo.
-            Print it, flash it, hack it, pour with it.
+        <Section id="rust" title="Firmware in Rust">
+          <p className="max-w-[40rem] leading-relaxed text-husk">
+            A hundred times a second, the firmware turns the pour pattern from dripper-centred
+            coordinates into an arm angle and a carriage radius. Both steppers run in velocity
+            mode, so the nozzle follows a spiral smoothly. The pump runs feed-forward from its
+            calibrated rate, is trimmed by the flow it measures, and is cut just early enough
+            that coast-down lands on the gram target.
           </p>
-          <a
-            href={GITHUB_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="glow-amber mt-8 inline-flex items-center gap-2 rounded-md bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.02]"
-          >
-            <Github className="h-4 w-4" />
-            Star cjodo/openpour on GitHub
-          </a>
-        </div>
-      </section>
+          <dl className="mt-10 grid gap-x-10 gap-y-8 md:grid-cols-3">
+            {firmwareParts.map((part) => (
+              <div key={part.name} className="border-t border-rule pt-4">
+                <dt className="font-mono text-water">{part.name}</dt>
+                <dd className="mt-2 leading-relaxed text-husk">{part.body}</dd>
+              </div>
+            ))}
+          </dl>
+          <pre className="mt-10 overflow-x-auto rounded-sm border border-rule bg-roast-raised p-5 font-mono text-sm leading-relaxed">
+            <code>
+              <span className="text-husk">
+                # builds the web app and firmware, flashes the ESP32, opens the monitor
+              </span>
+              {"\n"}cargo run --release
+            </code>
+          </pre>
+          <p className="mt-4 text-sm text-husk">
+            Toolchain setup and simulator instructions are in{" "}
+            <a href={repoPath("firmware")} className={link}>
+              firmware/
+            </a>
+            .
+          </p>
+        </Section>
 
-      {/* Footer */}
-      <footer className="border-t border-border/60">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
-          <div className="flex items-center gap-2">
-            <Droplets className="h-4 w-4 text-primary" />
-            <span className="font-display font-semibold text-foreground">
-              OpenPour
-            </span>
-            <span>· open source, repeatable, delicious</span>
+        <Section id="how" title="How it works">
+          <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
+            <ul className="max-w-[34rem] space-y-5 leading-relaxed text-husk">
+              <li>
+                <span className="font-semibold text-crema">Water.</span> You fill an insulated
+                reservoir from your own kettle. A peristaltic pump moves it through a flow meter
+                to the nozzle; 1 mL is 1 g. The machine never heats water.
+              </li>
+              <li>
+                <span className="font-semibold text-crema">Motion.</span> A two-axis polar arm,
+                with a direct-drive NEMA17 for angle and a belt-driven one for radius, traces
+                centre, circle and spiral patterns over the dripper.
+              </li>
+              <li>
+                <span className="font-semibold text-crema">Control.</span> The ESP32 serves the
+                app itself. Open a browser on any phone or laptop, on the machine&rsquo;s own
+                Wi-Fi or yours. Recipes are edited there and stored on the machine.
+              </li>
+            </ul>
+            <ConceptImage
+              src={detailImg}
+              alt="Exploded concept drawing of the arm, pump and flow meter."
+              width={1200}
+              height={912}
+            />
           </div>
-          <a
-            href={GITHUB_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 transition-colors hover:text-primary"
-          >
-            <Github className="h-4 w-4" />
+        </Section>
+
+        <Section id="build" title="Build one">
+          <ol className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-5">
+            {buildSteps.map((s, i) => (
+              <li key={s.title}>
+                <span className="wide figures text-3xl text-water" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <h3 className="mt-2 font-semibold">{s.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-husk">{s.body}</p>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-14">
+            <ConceptImage
+              src={heroImg}
+              alt="Concept render of a finished OpenPour machine pouring into a V60 dripper."
+              width={1600}
+              height={1008}
+            />
+          </div>
+        </Section>
+
+        <Section id="contribute" title="Contribute">
+          <p className="max-w-[40rem] leading-relaxed text-husk">
+            OpenPour gets better with every machine built. Report what broke, share your prints
+            and tweaks, or pick up an issue. Pull requests to the CAD, the firmware and the docs
+            are all welcome.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-x-7 gap-y-3">
+            <a href={`${REPO}/issues`} className={link}>
+              Browse open issues
+            </a>
+            <a href={REPO} className={link}>
+              Star the repo
+            </a>
+          </div>
+        </Section>
+      </main>
+
+      <footer className="border-t border-rule">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-husk sm:flex-row sm:justify-between sm:px-8">
+          <span>OpenPour is open-source hardware and software.</span>
+          <a href={REPO} className="hover:text-crema">
             github.com/cjodo/openpour
           </a>
         </div>
       </footer>
-    </div>
+    </>
   );
 }
