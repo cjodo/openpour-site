@@ -12,8 +12,8 @@
   --color-crema: #f0e6d6;
   --color-husk: #a8917c;
   --color-rule: #8c4e1d;
-  --color-water: #0073cf;
-  --color-water-deep: #004f8f;
+  --color-water: #4ba6f2;
+  --color-water-deep: #0073cf;
   /* Tints of water: same hue and saturation, only the lightness moves. */
   --color-water-lighter: hsl(from var(--color-water) h s 80%);
   --color-water-light: hsl(from var(--color-water) h s 62%);

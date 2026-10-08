@@ -161,7 +161,7 @@ function Index() {
             <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
               <a
                 href={REPO}
-                className="inline-flex items-center gap-2.5 rounded-sm bg-water px-5 py-3 font-semibold text-roast hover:bg-crema"
+                className="inline-flex items-center gap-2.5 rounded-sm bg-water-deep px-5 py-3 font-semibold text-white hover:bg-water-dark"
               >
                 <GithubMark className="size-4" />
                 cjodo/openpour
