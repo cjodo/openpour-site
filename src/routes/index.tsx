@@ -3,8 +3,10 @@ import type { ReactNode } from "react";
 
 import detailImg from "@/assets/openpour-detail.jpg";
 import heroImg from "@/assets/openpour-hero.jpg";
+import { EspressifMark } from "@/components/espressif-mark";
 import { GithubMark } from "@/components/github-mark";
 import { PourPlot } from "@/components/pour-plot";
+import { RustMark } from "@/components/rust-mark";
 
 const DESCRIPTION =
   "OpenPour is an open-source automatic pour-over coffee machine: 3D-printed parts, commodity electronics and ESP32 firmware written in Rust.";
@@ -247,6 +249,16 @@ function Index() {
             <a href={repoPath("firmware")} className={link}>
               firmware/
             </a>
+            . Built on the{" "}
+            <a href="https://www.rust-lang.org" className={link}>
+              <RustMark className="mr-1.5 inline size-[1.1em] align-[-0.2em] text-crema" />
+              Rust
+            </a>{" "}
+            toolchain for Espressif's{" "}
+            <a href="https://www.espressif.com/en/products/socs/esp32" className={link}>
+              <EspressifMark className="mr-1.5 inline size-[1.1em] align-[-0.2em] text-crema" />
+              ESP32
+            </a>
             .
           </p>
         </Section>
@@ -320,8 +332,14 @@ function Index() {
 
       <footer className="border-t border-rule bg-roast-analogous-1">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-husk sm:flex-row sm:justify-between sm:px-8">
-          <span>OpenPour is open-source hardware and software.</span>
-          <a href={REPO} className="hover:text-crema">
+          <div className="space-y-1">
+            <p>OpenPour is open-source hardware and software.</p>
+            <p className="text-xs">
+              Rust is a trademark of the Rust Foundation. ESP32 is a trademark of Espressif Systems.
+              OpenPour is not affiliated with or endorsed by either.
+            </p>
+          </div>
+          <a href={REPO} className="self-start hover:text-crema">
             github.com/cjodo/openpour
           </a>
         </div>
