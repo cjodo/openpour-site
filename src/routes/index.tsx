@@ -85,7 +85,7 @@ const buildSteps: { title: string; body: ReactNode }[] = [
 
 function Code({ children }: { children: ReactNode }) {
   return (
-    <code className="rounded-sm bg-roast-raised px-1 py-0.5 font-mono text-[0.9em] text-crema">
+    <code className="rounded-sm bg-roast-tint-1 px-1 py-0.5 font-mono text-[0.9em] text-crema">
       {children}
     </code>
   );
@@ -194,7 +194,7 @@ function Index() {
                 Licence: <span className="text-crema">{LICENCE ?? "not yet declared"}</span>.
               </p>
             </div>
-            <div className="self-start overflow-x-auto rounded-sm border border-rule bg-roast-raised p-5 font-mono text-sm leading-loose">
+            <div className="self-start overflow-x-auto rounded-sm border border-rule bg-roast-tone-1 p-5 font-mono text-sm leading-loose">
               <a href={REPO} className="text-crema hover:text-water">
                 openpour/
               </a>
@@ -234,7 +234,7 @@ function Index() {
               </div>
             ))}
           </dl>
-          <pre className="mt-10 overflow-x-auto rounded-sm border border-rule bg-roast-raised p-5 font-mono text-sm leading-relaxed">
+          <pre className="mt-10 overflow-x-auto rounded-sm border border-rule bg-roast-tone-1 p-5 font-mono text-sm leading-relaxed">
             <code>
               <span className="text-husk">
                 # builds the web app and firmware, flashes the ESP32, opens the monitor
@@ -318,7 +318,7 @@ function Index() {
         </Section>
       </main>
 
-      <footer className="border-t border-rule">
+      <footer className="border-t border-rule bg-roast-analogous-1">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-husk sm:flex-row sm:justify-between sm:px-8">
           <span>OpenPour is open-source hardware and software.</span>
           <a href={REPO} className="hover:text-crema">

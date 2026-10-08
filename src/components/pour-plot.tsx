@@ -194,7 +194,7 @@ export function PourPlot() {
 
           {/* Dripper rim and coffee bed. */}
           <circle r="110" fill="none" className="stroke-husk" strokeWidth="1.5" />
-          <circle r="72" className="fill-roast-raised" />
+          <circle r="72" className="fill-roast-tone-1" />
 
           <g fill="none" strokeLinecap="round" strokeLinejoin="round">
             {finishedPaths.map((d, i) => (
@@ -217,7 +217,7 @@ export function PourPlot() {
             cx={PIVOT.x}
             cy={PIVOT.y}
             r="9"
-            className="fill-roast stroke-crema/60"
+            className="fill-roast-shade-2 stroke-crema/60"
             strokeWidth="2"
           />
           <circle

@@ -9,7 +9,6 @@
  */
 @theme {
   --color-roast: #1f1510;
-  --color-roast-raised: #291c15;
   --color-crema: #f0e6d6;
   --color-husk: #a8917c;
   --color-rule: #8c4e1d;
@@ -20,6 +19,47 @@
   --color-water-light: hsl(from var(--color-water) h s 62%);
   --color-water-dark: hsl(from var(--color-water) h s 30%);
   --color-water-darker: hsl(from var(--color-water) h s 20%);
+
+  /* Roast variations: step 0 is roast itself, step 9 is the endpoint. */
+  /* Tints: mixed toward white. */
+  --color-roast-tint-1: #342a25;
+  --color-roast-tint-2: #4a413c;
+  --color-roast-tint-3: #625955;
+  --color-roast-tint-4: #7a736f;
+  --color-roast-tint-5: #938d8a;
+  --color-roast-tint-6: #ada8a6;
+  --color-roast-tint-7: #c8c4c3;
+  --color-roast-tint-8: #e3e1e1;
+  --color-roast-tint-9: #ffffff;
+  /* Shades: mixed toward black. Steps 7–9 round to pure black, so they're omitted. */
+  --color-roast-shade-1: #19100c;
+  --color-roast-shade-2: #130c08;
+  --color-roast-shade-3: #0d0705;
+  --color-roast-shade-4: #080403;
+  --color-roast-shade-5: #040201;
+  --color-roast-shade-6: #020101;
+  /* Tones: mixed toward mid grey. */
+  --color-roast-tone-1: #291f1b;
+  --color-roast-tone-2: #332a26;
+  --color-roast-tone-3: #3d3632;
+  --color-roast-tone-4: #48413e;
+  --color-roast-tone-5: #534d4b;
+  --color-roast-tone-6: #5e5957;
+  --color-roast-tone-7: #696665;
+  --color-roast-tone-8: #747372;
+  --color-roast-tone-9: #808080;
+
+  /* Roast harmonies: same lightness as roast, hue rotated around the wheel. */
+  --color-roast-complement: #0e191e; /* also square and rectangle */
+  --color-roast-analogous-1: #201414;
+  --color-roast-analogous-2: #1c170e;
+  --color-roast-split-1: #0d1a1b;
+  --color-roast-split-2: #121820;
+  --color-roast-triad-1: #0f1a16;
+  --color-roast-triad-2: #171620; /* also rectangle */
+  --color-roast-square-1: #131a11;
+  --color-roast-square-2: #1b151d;
+  --color-roast-rectangle-1: #18180e;
 
   --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
