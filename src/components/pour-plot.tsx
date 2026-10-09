@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { filledCells, type PourProgress, pourProgress, stageCells } from "@/lib/pour-progress";
+
 /*
  * A top-down view of the dripper while OpenPour runs a four-stage V60 recipe.
  * The nozzle traces the same centre / spiral / circle patterns the firmware
@@ -34,70 +36,84 @@ const PIVOT = { x: -128, y: -118 };
 // 1 SVG unit ≈ 0.53 mm, so the 110-unit rim is a V60-02's 58 mm radius.
 const MM_PER_UNIT = 0.53;
 
-function patternPoint(pattern: Pattern, p: number): { x: number; y: number } {
-  let r: number;
-  let turns: number;
+// Each stage's pattern is turned by the golden angle from the last, so repeat
+// pours land between earlier tracks instead of on top of them (phyllotaxis).
+const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
+const TAU = Math.PI * 2;
+
+function patternPoint(pattern: Pattern, p: number, phase = 0): { x: number; y: number } {
+  let x: number;
+  let y: number;
   switch (pattern) {
-    case "centre":
-      r = 7;
-      turns = 3;
+    case "centre": {
+      // Rhodonea r = cos(4θ/3): eight petals that close after three turns.
+      const a = p * 3 * TAU;
+      const r = 9 * Math.cos((4 / 3) * a);
+      x = r * Math.cos(a);
+      y = r * Math.sin(a);
       break;
-    case "circle":
-      r = 52;
-      turns = 4;
+    }
+    case "circle": {
+      // Hypotrochoid: a ring at r = 48 carrying a 9-unit epicycle, closed after
+      // four turns into a 17-loop band that wets the bed from r = 39 to 57.
+      const a = p * 4 * TAU;
+      x = 48 * Math.cos(a) + 9 * Math.cos((21 / 4) * a);
+      y = 48 * Math.sin(a) + 9 * Math.sin((21 / 4) * a);
       break;
-    case "spiral":
-      // Out to the edge of the bed and back in again.
-      r = 12 + 52 * (p < 0.5 ? p * 2 : (1 - p) * 2);
-      turns = 5;
+    }
+    case "spiral": {
+      // Fermat's spiral, r² ∝ θ: equal area per turn, so at a steady angular
+      // rate the bed gets equal water per area. Out to the edge, then back in
+      // on the same law while still turning, so the return weaves between.
+      const out = p < 0.5 ? p * 2 : (1 - p) * 2;
+      const r = Math.sqrt(12 ** 2 + (64 ** 2 - 12 ** 2) * out);
+      const a = p * 5 * TAU;
+      x = r * Math.cos(a);
+      y = r * Math.sin(a);
       break;
+    }
   }
-  const a = p * turns * Math.PI * 2 - Math.PI / 2;
-  return { x: r * Math.cos(a), y: r * Math.sin(a) };
+  // Start at twelve o'clock, then turn by the stage's phase.
+  const turn = phase - Math.PI / 2;
+  const c = Math.cos(turn);
+  const s = Math.sin(turn);
+  return { x: x * c - y * s, y: x * s + y * c };
 }
 
-function tracePath(pattern: Pattern, upTo: number): string {
-  const steps = Math.max(2, Math.round(260 * upTo));
+function phaseOf(index: number) {
+  return index * GOLDEN_ANGLE;
+}
+
+function tracePath(pattern: Pattern, upTo: number, phase: number): string {
+  const steps = Math.max(2, Math.round(480 * upTo));
   let d = "";
   for (let i = 0; i <= steps; i++) {
-    const { x, y } = patternPoint(pattern, (i / steps) * upTo);
+    const { x, y } = patternPoint(pattern, (i / steps) * upTo, phase);
     d += `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
   }
   return d;
 }
 
-type Snapshot = {
-  index: number;
-  progress: number;
-  grams: number;
-  clock: number;
-  nozzle: { x: number; y: number };
-};
-
-function snapshotAt(t: number): Snapshot {
+// Map compressed demo time onto real seconds at the machine.
+function clockAt(t: number) {
   let start = 0;
-  let from = 0;
   let realStart = 0;
-  let nozzle = { x: 0, y: 0 };
-  for (let index = 0; index < STAGES.length; index++) {
-    const stage = STAGES[index]!;
-    if (t < start + stage.dur || index === STAGES.length - 1) {
-      const progress = Math.min(1, (t - start) / stage.dur);
-      if (stage.pattern) nozzle = patternPoint(stage.pattern, progress);
-      return {
-        index,
-        progress,
-        grams: from + (stage.to - from) * progress,
-        clock: realStart + stage.real * progress,
-        nozzle,
-      };
-    }
-    if (stage.pattern) nozzle = patternPoint(stage.pattern, 1);
+  for (const stage of STAGES) {
+    if (t < start + stage.dur) return realStart + stage.real * ((t - start) / stage.dur);
     start += stage.dur;
-    from = stage.to;
     realStart += stage.real;
   }
-  throw new Error("unreachable");
+  return realStart;
+}
+
+// The nozzle rests where the latest pattern it has started left it.
+function nozzleAt(progress: PourProgress) {
+  let nozzle = { x: 0, y: 0 };
+  STAGES.forEach((stage, i) => {
+    const fraction = progress.stages[i]!;
+    if (stage.pattern && fraction > 0) nozzle = patternPoint(stage.pattern, fraction, phaseOf(i));
+  });
+  return nozzle;
 }
 
 function formatClock(seconds: number) {
@@ -144,8 +160,8 @@ function Cells({ stage, filled, empty }: { stage: Stage; filled: number; empty: 
   );
 }
 
-function ProgressBar({ stage, progress }: { stage: Stage; progress: number }) {
-  const filled = Math.round(progress * BAR_CELLS);
+function ProgressBar({ stage, fraction }: { stage: Stage; fraction: number }) {
+  const filled = filledCells(fraction, BAR_CELLS);
   return (
     <span className={`col-span-2 mt-1.5 ${barClass}`} aria-hidden="true">
       <Cells stage={stage} filled={filled} empty={BAR_CELLS - filled} />
@@ -155,19 +171,10 @@ function ProgressBar({ stage, progress }: { stage: Stage; progress: number }) {
 
 // The whole recipe in one bar: each stage gets cells in proportion to its real
 // time (largest remainder, at least one cell), drawn in its own glyph.
-const TOTAL_REAL = STAGES.reduce((sum, s) => sum + s.real, 0);
-const STAGE_CELLS = (() => {
-  const exact = STAGES.map((s) => (s.real / TOTAL_REAL) * BAR_CELLS);
-  const cells = exact.map((x) => Math.max(1, Math.floor(x)));
-  const byRemainder = exact.map((x, i) => ({ i, r: x - Math.floor(x) })).sort((a, b) => b.r - a.r);
-  for (let k = 0; cells.reduce((a, b) => a + b, 0) < BAR_CELLS; k++) {
-    cells[byRemainder[k % byRemainder.length]!.i]! += 1;
-  }
-  return cells;
-})();
+const STAGE_CELLS = stageCells(STAGES, BAR_CELLS);
 
-function RecipeBar({ clock }: { clock: number }) {
-  const filled = Math.round((clock / TOTAL_REAL) * BAR_CELLS);
+function RecipeBar({ fraction }: { fraction: number }) {
+  const filled = filledCells(fraction, BAR_CELLS);
   let start = 0;
   return (
     <div className={`mt-2 ${barClass}`} aria-hidden="true">
@@ -208,22 +215,24 @@ export function PourPlot() {
     return () => cancelAnimationFrame(frame);
   }, [paused, reducedMotion]);
 
-  const snap = snapshotAt(t);
-  const active = STAGES[snap.index]!;
-  const pouring = active.pattern !== null && snap.progress < 1;
+  const progress = pourProgress(STAGES, clockAt(t));
+  const { index, fraction } = progress.stage;
+  const active = STAGES[index]!;
+  const pouring = active.pattern !== null && fraction < 1;
+  const nozzle = nozzleAt(progress);
 
   // Finished stages never change, so only the live one is re-traced per frame.
   const finishedPaths = useMemo(
     () =>
-      STAGES.slice(0, snap.index)
-        .filter((s): s is Stage & { pattern: Pattern } => s.pattern !== null)
-        .map((s) => tracePath(s.pattern, 1)),
-    [snap.index],
+      STAGES.slice(0, index).flatMap((s, i) =>
+        s.pattern ? [tracePath(s.pattern, 1, phaseOf(i))] : [],
+      ),
+    [index],
   );
-  const livePath = active.pattern ? tracePath(active.pattern, snap.progress) : null;
+  const livePath = active.pattern ? tracePath(active.pattern, fraction, phaseOf(index)) : null;
 
-  const dx = snap.nozzle.x - PIVOT.x;
-  const dy = snap.nozzle.y - PIVOT.y;
+  const dx = nozzle.x - PIVOT.x;
+  const dy = nozzle.y - PIVOT.y;
   const armAngle = (Math.atan2(dy, dx) * 180) / Math.PI;
   const carriage = Math.hypot(dx, dy) * MM_PER_UNIT;
 
@@ -234,7 +243,7 @@ export function PourPlot() {
           viewBox="-150 -150 300 300"
           className="block w-full"
           role="img"
-          aria-label={`Top-down view of the dripper. ${active.name}, ${Math.round(snap.grams)} grams poured.`}
+          aria-label={`Top-down view of the dripper. ${active.name}, ${Math.round(progress.grams)} grams poured.`}
         >
           {/* Polar grid: the arm moves in angle and radius, so this is its native frame. */}
           <g className="stroke-rule" fill="none" strokeWidth="0.75">
@@ -271,8 +280,8 @@ export function PourPlot() {
           <line
             x1={PIVOT.x}
             y1={PIVOT.y}
-            x2={snap.nozzle.x}
-            y2={snap.nozzle.y}
+            x2={nozzle.x}
+            y2={nozzle.y}
             className="stroke-crema/50"
             strokeWidth="5"
             strokeLinecap="round"
@@ -285,8 +294,8 @@ export function PourPlot() {
             strokeWidth="2"
           />
           <circle
-            cx={snap.nozzle.x}
-            cy={snap.nozzle.y}
+            cx={nozzle.x}
+            cy={nozzle.y}
             r={pouring ? 5 : 3.5}
             className={pouring ? "fill-water" : "fill-ember"}
           />
@@ -296,19 +305,19 @@ export function PourPlot() {
       <figcaption className="figures">
         <div className="flex items-baseline justify-between gap-4">
           <span className="wide text-5xl text-brass" aria-hidden="true">
-            {Math.round(snap.grams)}
+            {Math.round(progress.grams)}
             <span className="ml-1 text-2xl text-husk">g</span>
           </span>
           <span className="text-lg text-husk" aria-hidden="true">
-            {formatClock(snap.clock)}
+            {formatClock(progress.elapsed)}
           </span>
         </div>
-        <RecipeBar clock={snap.clock} />
+        <RecipeBar fraction={progress.fraction} />
 
         <ol className="mt-3 text-sm" aria-label="Recipe stages">
           {STAGES.map((stage, i) => {
-            const isActive = i === snap.index;
-            const done = i < snap.index;
+            const isActive = i === index;
+            const done = i < index;
             return (
               <li
                 key={stage.name}
@@ -325,7 +334,7 @@ export function PourPlot() {
                   </span>
                 </span>
                 <span>{stage.pattern ? `${stage.to} g` : `${stage.real} s`}</span>
-                {isActive && <ProgressBar stage={stage} progress={snap.progress} />}
+                {isActive && <ProgressBar stage={stage} fraction={fraction} />}
               </li>
             );
           })}
