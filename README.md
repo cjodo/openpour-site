@@ -54,4 +54,6 @@ build-time secrets.
 
 ## Licence
 
-Not yet declared. Add one here if the site should share the machine's licence.
+The machine is licensed under the GPL-3.0 (see its
+[`LICENSE`](https://github.com/cjodo/openpour/blob/main/LICENSE)). This site
+repository does not declare a licence of its own yet.

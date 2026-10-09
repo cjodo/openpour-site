@@ -27,8 +27,8 @@ export const Route = createFileRoute("/")({
 const REPO = "https://github.com/cjodo/openpour";
 const repoPath = (path: string) => `${REPO}/tree/main/${path}`;
 
-// Not yet declared in the repo. Set this when a licence is chosen.
-const LICENCE: string | null = null;
+// The machine repo's LICENSE file.
+const LICENCE = { name: "GPL-3.0", href: `${REPO}/blob/main/LICENSE` };
 
 const repoTree = [
   { path: "hardware/cad/", note: "OpenSCAD model; config.scad holds every dimension" },
@@ -179,7 +179,11 @@ function Index() {
                 home. Fork it, resize it for your dripper, and send your changes back.
               </p>
               <p>
-                Licence: <span className="text-crema">{LICENCE ?? "not yet declared"}</span>.
+                Licence:{" "}
+                <a href={LICENCE.href} className={link}>
+                  {LICENCE.name}
+                </a>
+                .
               </p>
             </div>
             <div className="self-start overflow-x-auto rounded-sm border border-rule bg-grounds p-5 font-mono text-sm leading-loose">
