@@ -3,17 +3,24 @@
 
 /*
  * OpenPour palette — brewed, not black.
- * The page is espresso brown with crema-coloured type. The single accent is
- * water: the machine's whole job is metering it, so water is what glows blue.
- * Rules take the blue's complement, a burnt orange.
+ * The page is espresso brown with crema-coloured type; raised surfaces sit a
+ * shade lighter, in grounds. The main accent is water: the machine's whole job
+ * is metering it, so water is what glows blue. Rules take the blue's
+ * complement, a burnt orange. Two small accents back it up, each with one job:
+ * brass marks the machine's own names and numbers, and ember means stop: the
+ * pump is off, or something needs your attention.
  */
 @theme {
   --color-roast: #1f1510;
+  --color-grounds: #291c15;
   --color-crema: #f0e6d6;
   --color-husk: #a8917c;
   --color-rule: #8c4e1d;
   --color-water: #4ba6f2;
   --color-water-deep: #0073cf;
+  --color-water-deeper: #004f8f;
+  --color-brass: #bc8e19;
+  --color-ember: #ca4a32;
   /* Tints of water: same hue and saturation, only the lightness moves. */
   --color-water-lighter: hsl(from var(--color-water) h s 80%);
   --color-water-light: hsl(from var(--color-water) h s 62%);

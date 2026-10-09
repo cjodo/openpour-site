@@ -57,7 +57,7 @@ const parts: { name: string; icon: ReactNode }[] = [
     name: "DS18B20 probe",
     icon: (
       <>
-        <rect x="37" y="10" width="6" height="34" rx="3" />
+        <rect x="37" y="10" width="6" height="34" rx="3" className="stroke-brass" />
         <path d="M40 44 C40 60 22 56 22 70" />
       </>
     ),

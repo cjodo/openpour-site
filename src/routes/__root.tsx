@@ -50,9 +50,20 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-function Message({ title, body, children }: { title: string; body: string; children: ReactNode }) {
+function Message({
+  title,
+  body,
+  failed = false,
+  children,
+}: {
+  title: string;
+  body: string;
+  failed?: boolean;
+  children: ReactNode;
+}) {
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-4 sm:px-8">
+      {failed && <span className="mb-8 block h-1 w-14 bg-ember" aria-hidden="true" />}
       <h1 className="wide text-[clamp(2.5rem,8vw,4.5rem)] text-balance">{title}</h1>
       <p className="mt-6 max-w-[32rem] text-lg leading-relaxed text-husk">{body}</p>
       <div className="mt-10 flex flex-wrap gap-6">{children}</div>
@@ -82,6 +93,7 @@ function RouteError({ error, reset }: ErrorComponentProps) {
   return (
     <Message
       title="This page failed to load."
+      failed
       body="Reload to try again. If it keeps failing, the build files are still on GitHub."
     >
       <button

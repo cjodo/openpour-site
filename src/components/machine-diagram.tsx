@@ -3,6 +3,7 @@
  * the arm to the nozzle on the carriage. A schematic, not a drawing to scale.
  */
 
+// Parts that carry water are labelled in water blue.
 const label = "fill-husk font-mono";
 const leader = "stroke-rule";
 
@@ -15,7 +16,7 @@ export function MachineDiagram() {
         role="img"
         aria-label="Side view: a column with an arm on top, a carriage and nozzle riding the arm over a dripper, and water piped from a reservoir through a pump and flow meter to the nozzle."
       >
-        <g className="fill-roast-tone-1 stroke-husk" strokeWidth="1.5" strokeLinejoin="round">
+        <g className="fill-grounds stroke-husk" strokeWidth="1.5" strokeLinejoin="round">
           {/* Base, column and the angle stepper on top of it. */}
           <rect x="16" y="252" width="368" height="12" rx="2" />
           <rect x="40" y="58" width="22" height="194" />
@@ -39,7 +40,7 @@ export function MachineDiagram() {
         <line x1="70" y1="68" x2="318" y2="68" className="stroke-husk" strokeDasharray="3 3" />
 
         {/* Water: in the reservoir, through the tube, out of the nozzle. */}
-        <rect x="83" y="204" width="50" height="45" className="fill-water-deep/40" />
+        <rect x="83" y="204" width="50" height="45" className="fill-water-deeper" />
         <path
           d="M108 228 V150 M108 130 V116 M108 104 V80 H248"
           fill="none"
@@ -86,16 +87,16 @@ export function MachineDiagram() {
           <text x="180" y="50" textAnchor="middle">
             belt
           </text>
-          <text x="284" y="108">
+          <text x="284" y="108" className="fill-water">
             carriage + nozzle
           </text>
-          <text x="130" y="113">
+          <text x="130" y="113" className="fill-water">
             flow meter
           </text>
-          <text x="130" y="143">
+          <text x="130" y="143" className="fill-water">
             pump
           </text>
-          <text x="80" y="162">
+          <text x="80" y="162" className="fill-water">
             reservoir
           </text>
           <text x="308" y="153">

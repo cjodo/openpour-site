@@ -194,7 +194,7 @@ export function PourPlot() {
 
           {/* Dripper rim and coffee bed. */}
           <circle r="110" fill="none" className="stroke-husk" strokeWidth="1.5" />
-          <circle r="72" className="fill-roast-tone-1" />
+          <circle r="72" className="fill-grounds" />
 
           <g fill="none" strokeLinecap="round" strokeLinejoin="round">
             {finishedPaths.map((d, i) => (
@@ -224,14 +224,14 @@ export function PourPlot() {
             cx={snap.nozzle.x}
             cy={snap.nozzle.y}
             r={pouring ? 5 : 3.5}
-            className={pouring ? "fill-water" : "fill-crema"}
+            className={pouring ? "fill-water" : "fill-ember"}
           />
         </svg>
       </div>
 
       <figcaption className="figures">
         <div className="flex items-baseline justify-between gap-4 border-b border-rule pb-3">
-          <span className="wide text-5xl text-crema" aria-hidden="true">
+          <span className="wide text-5xl text-brass" aria-hidden="true">
             {Math.round(snap.grams)}
             <span className="ml-1 text-2xl text-husk">g</span>
           </span>
@@ -253,7 +253,11 @@ export function PourPlot() {
               >
                 <span>
                   {stage.name}
-                  <span className="block text-xs text-husk">{stage.pattern ?? "no water"}</span>
+                  <span
+                    className={`block text-xs ${isActive && stage.pattern ? "text-water" : "text-husk"}`}
+                  >
+                    {stage.pattern ?? "no water"}
+                  </span>
                 </span>
                 <span>{stage.pattern ? `${stage.to} g` : `${stage.real} s`}</span>
                 {isActive && (

@@ -87,7 +87,7 @@ const buildSteps: { title: string; body: ReactNode }[] = [
 
 function Code({ children }: { children: ReactNode }) {
   return (
-    <code className="rounded-sm bg-roast-tint-1 px-1 py-0.5 font-mono text-[0.9em] text-crema">
+    <code className="rounded-sm bg-grounds px-1 py-0.5 font-mono text-[0.9em] text-water">
       {children}
     </code>
   );
@@ -119,13 +119,13 @@ function Index() {
           OpenPour
         </a>
         <nav aria-label="Sections" className="flex items-center gap-5 text-sm sm:gap-8">
-          <a href="#open" className="hidden text-husk hover:text-crema sm:inline">
+          <a href="#open" className="hidden text-husk hover:text-water sm:inline">
             What&rsquo;s open
           </a>
-          <a href="#rust" className="hidden text-husk hover:text-crema sm:inline">
+          <a href="#rust" className="hidden text-husk hover:text-water sm:inline">
             Firmware
           </a>
-          <a href="#build" className="hidden text-husk hover:text-crema sm:inline">
+          <a href="#build" className="hidden text-husk hover:text-water sm:inline">
             Build
           </a>
           <a href={REPO} className="inline-flex items-center gap-2 text-crema hover:text-water">
@@ -149,7 +149,7 @@ function Index() {
             <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
               <a
                 href={REPO}
-                className="inline-flex items-center gap-2.5 rounded-sm bg-water-deep px-5 py-3 font-semibold text-white hover:bg-water-dark"
+                className="inline-flex items-center gap-2.5 rounded-sm bg-water-deep px-5 py-3 font-semibold text-white hover:bg-water-deeper"
               >
                 <GithubMark className="size-4" />
                 cjodo/openpour
@@ -158,7 +158,7 @@ function Index() {
                 Read the build guides
               </a>
             </div>
-            <p className="mt-9 max-w-[34rem] border-l-2 border-water pl-4 text-sm leading-relaxed text-husk">
+            <p className="mt-9 max-w-[34rem] border-l-2 border-ember pl-4 text-sm leading-relaxed text-husk">
               <strong className="font-semibold text-crema">Early prototype.</strong> The design
               is still changing. Expect rough edges, and open an issue when you hit one.
             </p>
@@ -182,7 +182,7 @@ function Index() {
                 Licence: <span className="text-crema">{LICENCE ?? "not yet declared"}</span>.
               </p>
             </div>
-            <div className="self-start overflow-x-auto rounded-sm border border-rule bg-roast-tone-1 p-5 font-mono text-sm leading-loose">
+            <div className="self-start overflow-x-auto rounded-sm border border-rule bg-grounds p-5 font-mono text-sm leading-loose">
               <a href={REPO} className="text-crema hover:text-water">
                 openpour/
               </a>
@@ -217,17 +217,17 @@ function Index() {
           <dl className="mt-10 grid gap-x-10 gap-y-8 md:grid-cols-3">
             {firmwareParts.map((part) => (
               <div key={part.name} className="border-t border-rule pt-4">
-                <dt className="font-mono text-water">{part.name}</dt>
+                <dt className="font-mono text-brass">{part.name}</dt>
                 <dd className="mt-2 leading-relaxed text-husk">{part.body}</dd>
               </div>
             ))}
           </dl>
-          <pre className="mt-10 overflow-x-auto rounded-sm border border-rule bg-roast-tone-1 p-5 font-mono text-sm leading-relaxed">
+          <pre className="mt-10 overflow-x-auto rounded-sm border border-rule bg-grounds p-5 font-mono text-sm leading-relaxed">
             <code>
               <span className="text-husk">
                 # builds the web app and firmware, flashes the ESP32, opens the monitor
               </span>
-              {"\n"}cargo run --release
+              {"\n"}<span className="text-water">cargo run --release</span>
             </code>
           </pre>
           <p className="mt-4 text-sm text-husk">
@@ -253,17 +253,17 @@ function Index() {
           <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
             <ul className="max-w-[34rem] space-y-5 leading-relaxed text-husk">
               <li>
-                <span className="font-semibold text-crema">Water.</span> You fill an insulated
+                <span className="font-semibold text-water">Water.</span> You fill an insulated
                 reservoir from your own kettle. A peristaltic pump moves it through a flow meter
                 to the nozzle; 1 mL is 1 g. The machine never heats water.
               </li>
               <li>
-                <span className="font-semibold text-crema">Motion.</span> A two-axis polar arm,
+                <span className="font-semibold text-water">Motion.</span> A two-axis polar arm,
                 with a direct-drive NEMA17 for angle and a belt-driven one for radius, traces
                 centre, circle and spiral patterns over the dripper.
               </li>
               <li>
-                <span className="font-semibold text-crema">Control.</span> The ESP32 serves the
+                <span className="font-semibold text-water">Control.</span> The ESP32 serves the
                 app itself. Open a browser on any phone or laptop, on the machine&rsquo;s own
                 Wi-Fi or yours. Recipes are edited there and stored on the machine.
               </li>
@@ -276,7 +276,7 @@ function Index() {
           <ol className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-5">
             {buildSteps.map((s, i) => (
               <li key={s.title}>
-                <span className="wide figures text-3xl text-water" aria-hidden="true">
+                <span className="wide figures text-3xl text-brass" aria-hidden="true">
                   {i + 1}
                 </span>
                 <h3 className="mt-2 font-semibold">{s.title}</h3>
@@ -306,7 +306,7 @@ function Index() {
         </Section>
       </main>
 
-      <footer className="border-t border-rule bg-roast-analogous-1">
+      <footer className="border-t border-rule bg-grounds">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-husk sm:flex-row sm:justify-between sm:px-8">
           <div className="space-y-1">
             <p>OpenPour is open-source hardware and software.</p>
@@ -315,7 +315,7 @@ function Index() {
               OpenPour is not affiliated with or endorsed by either.
             </p>
           </div>
-          <a href={REPO} className="self-start hover:text-crema">
+          <a href={REPO} className="self-start hover:text-water">
             github.com/cjodo/openpour
           </a>
         </div>
