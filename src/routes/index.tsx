@@ -139,7 +139,7 @@ function Index() {
         <section className="grid gap-12 pt-8 pb-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-14 lg:pt-14 lg:pb-20">
           <div>
             <h1 className="wide text-[clamp(2.75rem,6vw,4.75rem)] text-balance">
-              Pour&#8209;over, by the gram.
+              Poured to the gram.
             </h1>
             <p className="mt-7 max-w-[34rem] text-lg leading-relaxed text-husk">
               OpenPour is an open-source automatic pour-over machine. Print the parts, wire up
