@@ -4,10 +4,11 @@ import { filledCells, type PourProgress, pourProgress, stageCells } from "@/lib/
 
 /*
  * A top-down view of the dripper while OpenPour runs a four-stage V60 recipe.
- * The nozzle traces the same centre / spiral / circle patterns the firmware
- * uses, the arm is drawn from its real pivot (the column), and the gram
- * counter climbs to each stage's target. Demo time is compressed: `dur` is how
- * long a stage plays on screen, `real` is how long it takes at the machine.
+ * The nozzle traces centre / spiral / circle patterns as classical curves (a
+ * rose, a double Archimedean spiral, a hypotrochoid), the arm is drawn from its real pivot
+ * (the column), and the gram counter climbs to each stage's target. Demo time
+ * is compressed: `dur` is how long a stage plays on screen, `real` is how long
+ * it takes at the machine.
  */
 
 type Pattern = "centre" | "spiral" | "circle";
@@ -23,9 +24,9 @@ type Stage = {
 const STAGES: Stage[] = [
   { name: "Bloom", pattern: "centre", to: 50, dur: 2.4, real: 10 },
   { name: "Rest", pattern: null, to: 50, dur: 1.6, real: 35 },
-  { name: "Second pour", pattern: "spiral", to: 150, dur: 3.6, real: 30 },
+  { name: "Second pour", pattern: "spiral", to: 150, dur: 6.4, real: 30 },
   { name: "Third pour", pattern: "circle", to: 250, dur: 3.2, real: 30 },
-  { name: "Final pour", pattern: "spiral", to: 320, dur: 2.6, real: 25 },
+  { name: "Final pour", pattern: "spiral", to: 320, dur: 5.4, real: 25 },
   { name: "Drawdown", pattern: null, to: 320, dur: 2.8, real: 60 },
 ];
 
@@ -40,6 +41,74 @@ const MM_PER_UNIT = 0.53;
 // pours land between earlier tracks instead of on top of them (phyllotaxis).
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 const TAU = Math.PI * 2;
+
+/*
+ * The spiral is Archimedes' r = bθ taken for negative θ as well: two arms that
+ * meet in a smooth S at the centre and interleave half a pitch apart. The
+ * nozzle goes out along one arm, turns back in a half-circle at the rim, and
+ * comes home along the other, so no track crosses another. Archimedes keeps
+ * the tracks evenly spaced, and the nozzle moves at a constant speed along
+ * the path, so a steady flow lays the same water on every part of the bed.
+ */
+const SPIRAL_TURNS = 3;
+const SPIRAL_RIM = 64;
+const SPIRAL = (() => {
+  const end = SPIRAL_TURNS * TAU;
+  const b = SPIRAL_RIM / end;
+  const outer = SPIRAL_RIM;
+  const inner = b * (end - Math.PI);
+  const mid = (outer + inner) / 2;
+  const bend = (outer - inner) / 2;
+  const dir = (a: number) => ({ x: Math.cos(a), y: Math.sin(a) });
+  const ux = dir(end);
+  const uy = dir(end + Math.PI / 2);
+
+  // u runs 0 → 1 out the first arm, 1 → 2 round the bend, 2 → 3 back in.
+  const at = (u: number) => {
+    if (u <= 1) {
+      const a = u * end;
+      const d = dir(a);
+      return { x: b * a * d.x, y: b * a * d.y };
+    }
+    if (u <= 2) {
+      const f = (u - 1) * Math.PI;
+      const c = Math.cos(f) * bend;
+      const s = Math.sin(f) * bend;
+      return { x: ux.x * (mid + c) + uy.x * s, y: ux.y * (mid + c) + uy.y * s };
+    }
+    const a = (3 - u) * (end - Math.PI);
+    const d = dir(a + Math.PI);
+    return { x: b * a * d.x, y: b * a * d.y };
+  };
+
+  // Tabulate arc length so the pattern can be walked at a constant speed.
+  const samples = 4000;
+  const points = Array.from({ length: samples + 1 }, (_, i) => at((i / samples) * 3));
+  const lengths = [0];
+  for (let i = 1; i <= samples; i++) {
+    const p = points[i]!;
+    const q = points[i - 1]!;
+    lengths.push(lengths[i - 1]! + Math.hypot(p.x - q.x, p.y - q.y));
+  }
+  return { points, lengths };
+})();
+
+function spiralPoint(p: number) {
+  const { points, lengths } = SPIRAL;
+  const target = Math.min(1, Math.max(0, p)) * lengths.at(-1)!;
+  let lo = 0;
+  let hi = lengths.length - 1;
+  while (hi - lo > 1) {
+    const m = (lo + hi) >> 1;
+    if (lengths[m]! < target) lo = m;
+    else hi = m;
+  }
+  const span = lengths[hi]! - lengths[lo]!;
+  const f = span > 0 ? (target - lengths[lo]!) / span : 0;
+  const a = points[lo]!;
+  const z = points[hi]!;
+  return { x: a.x + (z.x - a.x) * f, y: a.y + (z.y - a.y) * f };
+}
 
 function patternPoint(pattern: Pattern, p: number, phase = 0): { x: number; y: number } {
   let x: number;
@@ -61,17 +130,9 @@ function patternPoint(pattern: Pattern, p: number, phase = 0): { x: number; y: n
       y = 48 * Math.sin(a) + 9 * Math.sin((21 / 4) * a);
       break;
     }
-    case "spiral": {
-      // Fermat's spiral, r² ∝ θ: equal area per turn, so at a steady angular
-      // rate the bed gets equal water per area. Out to the edge, then back in
-      // on the same law while still turning, so the return weaves between.
-      const out = p < 0.5 ? p * 2 : (1 - p) * 2;
-      const r = Math.sqrt(12 ** 2 + (64 ** 2 - 12 ** 2) * out);
-      const a = p * 5 * TAU;
-      x = r * Math.cos(a);
-      y = r * Math.sin(a);
+    case "spiral":
+      ({ x, y } = spiralPoint(p));
       break;
-    }
   }
   // Start at twelve o'clock, then turn by the stage's phase.
   const turn = phase - Math.PI / 2;
@@ -85,7 +146,7 @@ function phaseOf(index: number) {
 }
 
 function tracePath(pattern: Pattern, upTo: number, phase: number): string {
-  const steps = Math.max(2, Math.round(480 * upTo));
+  const steps = Math.max(2, Math.round(720 * upTo));
   let d = "";
   for (let i = 0; i <= steps; i++) {
     const { x, y } = patternPoint(pattern, (i / steps) * upTo, phase);
