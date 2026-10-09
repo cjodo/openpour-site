@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+import { CodeBlock } from "@/components/code-block";
 import { EspressifMark } from "@/components/espressif-mark";
 import { GithubMark } from "@/components/github-mark";
 import { MachineDiagram } from "@/components/machine-diagram";
@@ -226,15 +227,11 @@ function Index() {
               </div>
             ))}
           </dl>
-          <pre className="mt-10 overflow-x-auto rounded-sm border border-rule bg-grounds p-5 font-mono text-sm leading-relaxed">
-            <code>
-              <span className="text-husk">
-                # builds the web app and firmware, flashes the ESP32, opens the monitor
-              </span>
-              {"\n"}
-              <span className="text-water">cargo run --release</span>
-            </code>
-          </pre>
+          <CodeBlock
+            className="mt-10"
+            comment="builds the web app and firmware, flashes the ESP32, opens the monitor"
+            commands={["cargo run --release"]}
+          />
           <p className="mt-4 text-sm text-husk">
             Toolchain setup and simulator instructions are in{" "}
             <a href={repoPath("firmware")} className={link}>
