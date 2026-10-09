@@ -74,8 +74,8 @@ const buildSteps: { title: string; body: ReactNode }[] = [
     title: "Flash",
     body: (
       <>
-        <Code>cargo run --release</Code> builds the app and firmware, flashes the ESP32 and
-        opens the serial monitor.
+        <Code>cargo run --release</Code> builds the app and firmware, flashes the ESP32 and opens
+        the serial monitor.
       </>
     ),
   },
@@ -143,8 +143,8 @@ function Index() {
             </h1>
             <p className="mt-7 max-w-[34rem] text-lg leading-relaxed text-husk">
               OpenPour is an open-source automatic pour-over machine. Print the parts, wire up
-              commodity electronics, and flash Rust firmware that pours each stage of your
-              recipe to the gram. Every file you need is in the repo.
+              commodity electronics, and flash Rust firmware that pours each stage of your recipe to
+              the gram. Every file you need is in the repo.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
               <a
@@ -159,8 +159,8 @@ function Index() {
               </a>
             </div>
             <p className="mt-9 max-w-[34rem] border-l-2 border-ember pl-4 text-sm leading-relaxed text-husk">
-              <strong className="font-semibold text-crema">Early prototype.</strong> The design
-              is still changing. Expect rough edges, and open an issue when you hit one.
+              <strong className="font-semibold text-crema">Early prototype.</strong> The design is
+              still changing. Expect rough edges, and open an issue when you hit one.
             </p>
           </div>
           <PourPlot />
@@ -170,13 +170,13 @@ function Index() {
           <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
             <div className="max-w-[34rem] space-y-4 leading-relaxed text-husk">
               <p>
-                All of it. The CAD, the firmware, the control app and the build guides live
-                together in one repository, so a hardware change and the code that drives it
-                land in the same commit.
+                All of it. The CAD, the firmware, the control app and the build guides live together
+                in one repository, so a hardware change and the code that drives it land in the same
+                commit.
               </p>
               <p>
-                The model is parametric, the electronics are off the shelf, and nothing phones
-                home. Fork it, resize it for your dripper, and send your changes back.
+                The model is parametric, the electronics are off the shelf, and nothing phones home.
+                Fork it, resize it for your dripper, and send your changes back.
               </p>
               <p>
                 Licence:{" "}
@@ -213,10 +213,10 @@ function Index() {
         <Section id="rust" title="Firmware in Rust">
           <p className="max-w-[40rem] leading-relaxed text-husk">
             A hundred times a second, the firmware turns the pour pattern from dripper-centred
-            coordinates into an arm angle and a carriage radius. Both steppers run in velocity
-            mode, so the nozzle follows a spiral smoothly. The pump runs feed-forward from its
-            calibrated rate, is trimmed by the flow it measures, and is cut just early enough
-            that coast-down lands on the gram target.
+            coordinates into an arm angle and a carriage radius. Both steppers run in velocity mode,
+            so the nozzle follows a spiral smoothly. The pump runs feed-forward from its calibrated
+            rate, is trimmed by the flow it measures, and is cut just early enough that coast-down
+            lands on the gram target.
           </p>
           <dl className="mt-10 grid gap-x-10 gap-y-8 md:grid-cols-3">
             {firmwareParts.map((part) => (
@@ -231,7 +231,8 @@ function Index() {
               <span className="text-husk">
                 # builds the web app and firmware, flashes the ESP32, opens the monitor
               </span>
-              {"\n"}<span className="text-water">cargo run --release</span>
+              {"\n"}
+              <span className="text-water">cargo run --release</span>
             </code>
           </pre>
           <p className="mt-4 text-sm text-husk">
@@ -258,18 +259,18 @@ function Index() {
             <ul className="max-w-[34rem] space-y-5 leading-relaxed text-husk">
               <li>
                 <span className="font-semibold text-water">Water.</span> You fill an insulated
-                reservoir from your own kettle. A peristaltic pump moves it through a flow meter
-                to the nozzle; 1 mL is 1 g. The machine never heats water.
+                reservoir from your own kettle. A peristaltic pump moves it through a flow meter to
+                the nozzle; 1 mL is 1 g. The machine never heats water.
               </li>
               <li>
-                <span className="font-semibold text-water">Motion.</span> A two-axis polar arm,
-                with a direct-drive NEMA17 for angle and a belt-driven one for radius, traces
-                centre, circle and spiral patterns over the dripper.
+                <span className="font-semibold text-water">Motion.</span> A two-axis polar arm, with
+                a direct-drive NEMA17 for angle and a belt-driven one for radius, traces centre,
+                circle and spiral patterns over the dripper.
               </li>
               <li>
-                <span className="font-semibold text-water">Control.</span> The ESP32 serves the
-                app itself. Open a browser on any phone or laptop, on the machine&rsquo;s own
-                Wi-Fi or yours. Recipes are edited there and stored on the machine.
+                <span className="font-semibold text-water">Control.</span> The ESP32 serves the app
+                itself. Open a browser on any phone or laptop, on the machine&rsquo;s own Wi-Fi or
+                yours. Recipes are edited there and stored on the machine.
               </li>
             </ul>
             <MachineDiagram />
@@ -295,9 +296,9 @@ function Index() {
 
         <Section id="contribute" title="Contribute">
           <p className="max-w-[40rem] leading-relaxed text-husk">
-            OpenPour gets better with every machine built. Report what broke, share your prints
-            and tweaks, or pick up an issue. Pull requests to the CAD, the firmware and the docs
-            are all welcome.
+            OpenPour gets better with every machine built. Report what broke, share your prints and
+            tweaks, or pick up an issue. Pull requests to the CAD, the firmware and the docs are all
+            welcome.
           </p>
           <div className="mt-8 flex flex-wrap gap-x-7 gap-y-3">
             <a href={`${REPO}/issues`} className={link}>
