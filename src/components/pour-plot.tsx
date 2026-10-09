@@ -221,14 +221,24 @@ function Cells({ stage, filled, empty }: { stage: Stage; filled: number; empty: 
   );
 }
 
+// The nozzle rides the tip of the stage bar, as in the plot: solid while it
+// pours, hollow while it waits.
 function ProgressBar({ stage, fraction }: { stage: Stage; fraction: number }) {
-  const filled = filledCells(fraction, BAR_CELLS);
+  const filled = filledCells(fraction, BAR_CELLS - 1);
   return (
-    <span className={`col-span-2 mt-1.5 ${barClass}`} aria-hidden="true">
-      <Cells stage={stage} filled={filled} empty={BAR_CELLS - filled} />
+    <span className={`col-span-full mt-1.5 ${barClass}`} aria-hidden="true">
+      <Cells stage={stage} filled={filled} empty={0} />
+      <span className={stage.pattern ? "text-water" : "text-ember"}>
+        {stage.pattern ? "●" : "○"}
+      </span>
+      <Cells stage={stage} filled={0} empty={BAR_CELLS - 1 - filled} />
     </span>
   );
 }
+
+// Paper Mono's circled digits: filled once a stage is reached, open before.
+const OPEN_DIGITS = "①②③④⑤⑥⑦⑧⑨";
+const SOLID_DIGITS = "❶❷❸❹❺❻❼❽❾";
 
 // The whole recipe in one bar: each stage gets cells in proportion to its real
 // time (largest remainder, at least one cell), drawn in its own glyph.
@@ -382,15 +392,25 @@ export function PourPlot() {
             return (
               <li
                 key={stage.name}
-                className={`grid grid-cols-[1fr_auto] gap-x-3 py-1.5 ${
+                className={`grid grid-cols-[auto_1fr_auto] gap-x-3 py-1.5 ${
                   isActive ? "text-crema" : done ? "text-husk" : "text-husk/60"
                 }`}
               >
+                <span
+                  className={`font-mono text-xl leading-5 ${isActive ? (stage.pattern ? "text-water" : "text-ember") : ""}`}
+                  aria-hidden="true"
+                >
+                  {(isActive || done ? SOLID_DIGITS : OPEN_DIGITS)[i]}
+                </span>
                 <span>
                   {stage.name}
                   <span
                     className={`block text-xs ${isActive && stage.pattern ? "text-water" : "text-husk"}`}
                   >
+                    {/* The stage's own line, as a key to its run in the recipe bar. */}
+                    <span className="font-mono" aria-hidden="true">
+                      {glyphsFor(stage).fill.repeat(2)}
+                    </span>{" "}
                     {stage.pattern ?? "no water"}
                   </span>
                 </span>
