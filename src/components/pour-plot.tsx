@@ -120,16 +120,64 @@ function usePrefersReducedMotion() {
 // Box-drawing glyphs are 0.606em in Paper Mono, so 19 at text-lg fill the 13rem column.
 const BAR_CELLS = 19;
 
-function ProgressBar({ progress }: { progress: number }) {
+// Each pattern draws its bar in its own line style; rests are dotted.
+const GLYPHS: Record<Pattern | "rest", { fill: string; empty: string }> = {
+  centre: { fill: "━", empty: "─" },
+  spiral: { fill: "╍", empty: "┄" },
+  circle: { fill: "═", empty: "─" },
+  rest: { fill: "┅", empty: "┄" },
+};
+
+function glyphsFor(stage: Stage) {
+  return GLYPHS[stage.pattern ?? "rest"];
+}
+
+const barClass = "overflow-hidden font-mono text-lg leading-none whitespace-nowrap";
+
+function Cells({ stage, filled, empty }: { stage: Stage; filled: number; empty: number }) {
+  const { fill, empty: rest } = glyphsFor(stage);
+  return (
+    <>
+      <span className={stage.pattern ? "text-water" : "text-husk"}>{fill.repeat(filled)}</span>
+      <span className="text-rule">{rest.repeat(empty)}</span>
+    </>
+  );
+}
+
+function ProgressBar({ stage, progress }: { stage: Stage; progress: number }) {
   const filled = Math.round(progress * BAR_CELLS);
   return (
-    <span
-      className="col-span-2 mt-1.5 overflow-hidden font-mono text-lg leading-none whitespace-nowrap"
-      aria-hidden="true"
-    >
-      <span className="text-water">{"━".repeat(filled)}</span>
-      <span className="text-rule">{"─".repeat(BAR_CELLS - filled)}</span>
+    <span className={`col-span-2 mt-1.5 ${barClass}`} aria-hidden="true">
+      <Cells stage={stage} filled={filled} empty={BAR_CELLS - filled} />
     </span>
+  );
+}
+
+// The whole recipe in one bar: each stage gets cells in proportion to its real
+// time (largest remainder, at least one cell), drawn in its own glyph.
+const TOTAL_REAL = STAGES.reduce((sum, s) => sum + s.real, 0);
+const STAGE_CELLS = (() => {
+  const exact = STAGES.map((s) => (s.real / TOTAL_REAL) * BAR_CELLS);
+  const cells = exact.map((x) => Math.max(1, Math.floor(x)));
+  const byRemainder = exact.map((x, i) => ({ i, r: x - Math.floor(x) })).sort((a, b) => b.r - a.r);
+  for (let k = 0; cells.reduce((a, b) => a + b, 0) < BAR_CELLS; k++) {
+    cells[byRemainder[k % byRemainder.length]!.i]! += 1;
+  }
+  return cells;
+})();
+
+function RecipeBar({ clock }: { clock: number }) {
+  const filled = Math.round((clock / TOTAL_REAL) * BAR_CELLS);
+  let start = 0;
+  return (
+    <div className={`mt-2 ${barClass}`} aria-hidden="true">
+      {STAGES.map((stage, i) => {
+        const cells = STAGE_CELLS[i]!;
+        const done = Math.min(cells, Math.max(0, filled - start));
+        start += cells;
+        return <Cells key={stage.name} stage={stage} filled={done} empty={cells - done} />;
+      })}
+    </div>
   );
 }
 
@@ -246,7 +294,7 @@ export function PourPlot() {
       </div>
 
       <figcaption className="figures">
-        <div className="flex items-baseline justify-between gap-4 border-b border-rule pb-3">
+        <div className="flex items-baseline justify-between gap-4">
           <span className="wide text-5xl text-brass" aria-hidden="true">
             {Math.round(snap.grams)}
             <span className="ml-1 text-2xl text-husk">g</span>
@@ -255,6 +303,7 @@ export function PourPlot() {
             {formatClock(snap.clock)}
           </span>
         </div>
+        <RecipeBar clock={snap.clock} />
 
         <ol className="mt-3 text-sm" aria-label="Recipe stages">
           {STAGES.map((stage, i) => {
@@ -276,14 +325,14 @@ export function PourPlot() {
                   </span>
                 </span>
                 <span>{stage.pattern ? `${stage.to} g` : `${stage.real} s`}</span>
-                {isActive && <ProgressBar progress={snap.progress} />}
+                {isActive && <ProgressBar stage={stage} progress={snap.progress} />}
               </li>
             );
           })}
         </ol>
 
         <div className="mt-4 flex items-center justify-between gap-4 border-t border-rule pt-3 text-xs text-husk">
-          <span>
+          <span className="whitespace-nowrap">
             arm {armAngle.toFixed(1)}° &nbsp; carriage {carriage.toFixed(0)} mm
           </span>
           {!reducedMotion && (
