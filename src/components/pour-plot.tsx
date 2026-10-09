@@ -117,6 +117,22 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
+// Box-drawing glyphs are 0.606em in Paper Mono, so 19 at text-lg fill the 13rem column.
+const BAR_CELLS = 19;
+
+function ProgressBar({ progress }: { progress: number }) {
+  const filled = Math.round(progress * BAR_CELLS);
+  return (
+    <span
+      className="col-span-2 mt-1.5 overflow-hidden font-mono text-lg leading-none whitespace-nowrap"
+      aria-hidden="true"
+    >
+      <span className="text-water">{"━".repeat(filled)}</span>
+      <span className="text-rule">{"─".repeat(BAR_CELLS - filled)}</span>
+    </span>
+  );
+}
+
 // With motion reduced, hold on the moment every pattern has been drawn.
 const STILL_FRAME = LOOP - STAGES.at(-1)!.dur + 0.01;
 
@@ -247,7 +263,7 @@ export function PourPlot() {
             return (
               <li
                 key={stage.name}
-                className={`relative grid grid-cols-[1fr_auto] gap-x-3 py-1.5 ${
+                className={`grid grid-cols-[1fr_auto] gap-x-3 py-1.5 ${
                   isActive ? "text-crema" : done ? "text-husk" : "text-husk/60"
                 }`}
               >
@@ -260,12 +276,7 @@ export function PourPlot() {
                   </span>
                 </span>
                 <span>{stage.pattern ? `${stage.to} g` : `${stage.real} s`}</span>
-                {isActive && (
-                  <span
-                    className="absolute bottom-0 left-0 h-px bg-water"
-                    style={{ width: `${snap.progress * 100}%` }}
-                  />
-                )}
+                {isActive && <ProgressBar progress={snap.progress} />}
               </li>
             );
           })}
